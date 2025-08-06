@@ -1,14 +1,18 @@
 {
   "version": 2,
-  "functions": {
-    "shficntk.js": {
-      "runtime": "nodejs18.x"
+  "builds": [
+    {
+      "src": "shficntk.js",
+      "use": "@vercel/node"
     }
-  },
+  ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/shficntk.js"
+      "dest": "shficntk.js"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
