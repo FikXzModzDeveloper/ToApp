@@ -1,7 +1,14 @@
+/*  Script Web Created By FikXzMods
+    Penyedia Api : BagusXixpen
+    No hapus Credit, apalgi Jual Dasar Jebeh
+
+*/
+
+
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const path = require('path'); // Tambahkan ini
+const path = require('path'); 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -32,12 +39,10 @@ app.post('/api/build', async (req, res) => {
   }
 });
 
-// Ini bagian yang krusial untuk Vercel & Lokal
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
   });
 }
 
-// Handler untuk Vercel
 module.exports = app;
