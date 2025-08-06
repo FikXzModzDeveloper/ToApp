@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Convert Web To App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* --- Dark-mode anti-flash --- */
+    html.dark { color-scheme: dark }
+    /* --- Animations --- */
+    @keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+    .fadeIn{animation:fadeIn .6s ease forwards}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinner{width:24px;height:24px;border:3px solid #e5e7eb;border-top:3px solid #3b82f6;border-radius:50%;animation:spin 1s linear infinite}
+    /* Ripple effect */
+    .ripple{position:relative;overflow:hidden}
+    .ripple span.ripple-effect{position:absolute;border-radius:50%;transform:scale(0);animation:ripple .6s linear; background:rgba(255,255,255,.4)}
+    @keyframes ripple{to{transform:scale(4);opacity:0}}
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans">
+
+<!-- Dark-mode toggle -->
+<button id="themeToggle" class="fixed top-4 right-4 z-50 p-2 rounded-full bg-slate-200 dark:bg-slate-700 shadow-lg transition-transform hover:scale-110">
+  <svg id="themeIcon" class="w-6 h-6 transition-transform duration-500" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/>
+  </svg>
+</button>
+
+<main class="max-w-3xl mx-auto px-4 py-20">
+  <div class="text-center mb-10">
+    <h1 class="text-4xl md:text-5xl font-bold fadeIn">Web2App Generator</h1>
+    <p class="mt-2 text-slate-500 dark:text-slate-400 fadeIn">Ubah website jadi APK Android dalam 1 klik.</p>
+  </div>
+
+  <!-- Form -->
+  <form id="generatorForm" class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl shadow-2xl fadeIn">
+    <label class="block mb-2 font-semibold">URL Website</label>
+    <input id="url" type="url" required placeholder="https://example.com"
+      class="w-full p-3 rounded-md bg-slate-100 dark:bg-slate-700 border border-transparent focus:ring focus:ring-blue-500 outline-none"/>
+
+    <label class="block mt-4 mb-2 font-semibold">Email</label>
+    <input id="email" type="email" placeholder="you@domain.com"
+      class="w-full p-3 rounded-md bg-slate-100 dark:bg-slate-700 border border-transparent focus:ring focus:ring-blue-500 outline-none"/>
+
+    <label class="block mt-4 mb-2 font-semibold">Nama Aplikasi</label>
+    <input id="appName" type="text" required placeholder="MyApp"
+      class="w-full p-3 rounded-md bg-slate-100 dark:bg-slate-700 border border-transparent focus:ring focus:ring-blue-500 outline-none"/>
+
+    <button type="submit"
+      class="w-full mt-6 ripple bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-md transition-all duration-300 flex items-center justify-center gap-2">
+      <span id="btnText">Generate APK</span>
+      <div id="spinner" class="spinner hidden"></div>
+    </button>
+  </form>
+
+  <!-- Progress -->
+  <div id="progressBox" class="hidden mt-6">
+    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5">
+      <div id="progressBar" class="bg-blue-500 h-2.5 rounded-full transition-all duration-300" style="width:0%"></div>
+    </div>
+    <p id="progressText" class="text-center text-sm mt-2 text-slate-500 dark:text-slate-400">Mempersiapkan...</p>
+  </div>
+
+  <!-- Alert -->
+  <div id="alertBox" class="hidden mt-6 p-4 rounded-lg text-white font-semibold"></div>
+
+  <!-- Download button (muncul setelah selesai) -->
+  <div id="downloadBox" class="hidden mt-6 text-center">
+    <a id="downloadBtn" href="#" download
+      class="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-md ripple transition-transform hover:scale-105">
+      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l.707.707L15.5 5.086V12h1V5.086l2.793-2.379L20.5 4.5 12 13 3.5 4.5l1.707-1.707L8 5.086V12h1V5.086L11.293 2.707 12 2zM4 14v8h16v-8h2v10H2V14h2z"/></svg>
+      Download APK
+    </a>
+  </div>
+</main>
+
+<script>
+/* ---------- Anti-flash dark-mode ---------- */
+(()=>{
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(saved==='dark' || (!saved && prefersDark)) document.documentElement.classList.add('dark');
+})();
+/* ---------- Toggle ---------- */
+const toggleBtn = document.getElementById('themeToggle');
+const html = document.documentElement;
+toggleBtn.addEventListener('click', ()=>{
+  html.classList.toggle('dark');
+  localStorage.setItem('theme', html.classList.contains('dark')?'dark':'light');
+});
+/* ---------- Ripple effect ---------- */
+document.querySelectorAll('.ripple').forEach(btn=>{
+  btn.addEventListener('click', function(e){
+    const span = document.createElement('span');
+    const size = Math.max(this.clientWidth, this.clientHeight);
+    const rect = this.getBoundingClientRect();
+    span.className='ripple-effect';
+    span.style.width=span.style.height=size+'px';
+    span.style.left=e.clientX-rect.left-size/2+'px';
+    span.style.top=e.clientY-rect.top-size/2+'px';
+    this.appendChild(span);
+    setTimeout(()=>span.remove(),600);
+  });
+});
+/* ---------- Form handler ---------- */
+const form = document.getElementById('generatorForm');
+const btnText = document.getElementById('btnText');
+const spinner = document.getElementById('spinner');
+const progressBox = document.getElementById('progressBox');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+const alertBox = document.getElementById('alertBox');
+const downloadBox = document.getElementById('downloadBox');
+const downloadBtn = document.getElementById('downloadBtn');
+
+function showAlert(msg, type='success'){
+  alertBox.className=`mt-6 p-4 rounded-lg text-white font-semibold ${type==='success'?'bg-green-500':'bg-red-500'}`;
+  alertBox.textContent=msg;
+  alertBox.classList.remove('hidden');
+}
+
+form.onsubmit = async (e)=>{
+  e.preventDefault();
+  btnText.textContent='Generating...';
+  spinner.classList.remove('hidden');
+  progressBox.classList.remove('hidden');
+  alertBox.classList.add('hidden');
+  downloadBox.classList.add('hidden');
+
+  const url=document.getElementById('url').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const appName=document.getElementById('appName').value.trim();
+
+  let w=0;
+  const prog=setInterval(()=>{
+    w+=4;
+    progressBar.style.width=`${w}%`;
+    progressText.textContent=w<30?'Mengundang resource...':w<70?'Compiling APK...':'Finalizing...';
+    if(w>=100)clearInterval(prog);
+  },100);
+
+  try{
+    const res=await fetch('https://web2apk-cg.zone.id/tools/web2app?apikey=bagus',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:new URLSearchParams({url,email,name:appName})
+    });
+    const data=await res.json();
+    if(data.status){
+      clearInterval(prog);
+      progressBar.style.width='100%';
+      progressText.textContent='Selesai!';
+      downloadBtn.href=data.download;
+      downloadBox.classList.remove('hidden');
+      showAlert('APK berhasil dibuat! Klik tombol di bawah.');
+    }else{
+      throw new Error('Server mengembalikan status false');
+    }
+  }catch(err){
+    clearInterval(prog);
+    showAlert('Gagal: '+err.message,'error');
+  }finally{
+    btnText.textContent='Generate APK';
+    spinner.classList.add('hidden');
+    setTimeout(()=>progressBox.classList.add('hidden'),1500);
+  }
+}
+</script>
+</body>
+</html>
