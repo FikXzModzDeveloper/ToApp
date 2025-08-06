@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "shficntk.js",
+      "src": "kwontol.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "shficntk.js"
+      "dest": "kwontol.js"
     }
   ],
   "env": {
