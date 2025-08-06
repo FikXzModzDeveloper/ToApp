@@ -81,7 +81,7 @@ form.addEventListener('submit', async e => {
     });
     const data = await res.json();
     if (data.status) {
-      msg.textContent = `Aplikasi “${data.appName}” berhasil dibangun!`;
+      msg.textContent = `Aplikasi “${data.appName}” berhasil di Buat`;
       dlLink.href = data.download;
       result.classList.remove('hidden');
     } else {
