@@ -6,7 +6,7 @@ Sebuah proyek sederhana yang memanfaatkan Api Bagus Xixpen, **https://web2apk-cg
 
 ## 🚀 Fitur 
 
-- 🔄 Konversi website ke APK secara instan
+- 🔄 Konversi website ke APK
 
 - ☁️ Bisa dijalankan di localhost, Vercel, Netlify, dan platform lainnya
 
